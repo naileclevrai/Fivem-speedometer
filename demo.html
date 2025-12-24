@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedometer Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .speedometer-container {
+            position: fixed;
+            z-index: 1000;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .speedometer-container.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+
+        .speedometer-container:not(.hidden) {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .speedometer-container[data-position="bottom-left"] {
+            bottom: 30px;
+            left: 30px;
+        }
+
+        .speedometer-container[data-position="bottom-right"] {
+            bottom: 30px;
+            right: 30px;
+        }
+
+        .speedometer-container[data-position="bottom-center"] {
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .speedometer-container[data-position="bottom-center"]:not(.hidden) {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .speedometer-container[data-position="bottom-center"].hidden {
+            transform: translateX(-50%) translateY(20px);
+        }
+
+        .speedometer-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .speed-gauge {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gauge-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-background {
+            transition: stroke 0.3s ease;
+        }
+
+        .gauge-fill {
+            transition: stroke-dashoffset 0.1s linear, stroke 0.3s ease;
+        }
+
+        .gauge-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .speed-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s ease;
+        }
+
+        .speed-unit {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .vehicle-stats {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-label {
+            font-size: 8px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .stat-item.engine-off .stat-value {
+            color: rgba(255, 80, 80, 1);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .stat-item.seatbelt-off .stat-value {
+            color: rgba(255, 180, 60, 1);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .speedometer-container[data-theme="light"] .speed-value {
+            color: rgba(0, 0, 0, 0.9);
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .speedometer-container[data-theme="light"] .speed-unit {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .speedometer-container[data-theme="light"] .gauge-background {
+            stroke: rgba(0, 0, 0, 0.1);
+        }
+
+        .speedometer-container[data-theme="light"] .gauge-fill {
+            stroke: rgba(0, 0, 0, 0.6);
+        }
+
+        .speedometer-container[data-theme="light"] .stat-value {
+            color: rgba(0, 0, 0, 0.9);
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .speedometer-container[data-theme="light"] .stat-label {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            z-index: 2000;
+            min-width: 300px;
+        }
+
+        .controls h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .control-group input[type="range"] {
+            padding: 0;
+        }
+
+        .control-group button {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .control-group button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-row button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="speedometer" class="speedometer-container hidden">
+        <div class="speedometer-wrapper">
+            <div class="speed-gauge">
+                <svg class="gauge-svg" viewBox="0 0 200 200">
+                    <circle class="gauge-background" cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/>
+                    <circle class="gauge-fill" cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="6" stroke-dasharray="565.48" stroke-dashoffset="565.48" stroke-linecap="round"/>
+                </svg>
+                <div class="gauge-content">
+                    <div class="speed-value" id="speedValue">0</div>
+                    <div class="speed-unit" id="speedUnit">km/h</div>
+                </div>
+            </div>
+            
+            <div class="vehicle-stats">
+                <div class="stat-item" id="rpmInfo" style="display: none;">
+                    <span class="stat-value" id="rpmValue">0</span>
+                    <span class="stat-label">RPM</span>
+                </div>
+                <div class="stat-item" id="gearInfo" style="display: none;">
+                    <span class="stat-value" id="gearValue">N</span>
+                    <span class="stat-label">GEAR</span>
+                </div>
+                <div class="stat-item" id="engineInfo" style="display: none;">
+                    <span class="stat-value" id="engineValue">ON</span>
+                    <span class="stat-label">ENG</span>
+                </div>
+                <div class="stat-item" id="seatbeltInfo" style="display: none;">
+                    <span class="stat-value" id="seatbeltValue">✓</span>
+                    <span class="stat-label">BELT</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <h3>🎮 Contrôles Demo</h3>
+        
+        <div class="control-group">
+            <label>Vitesse: <span id="speedDisplay">0</span> km/h</label>
+            <input type="range" id="speedSlider" min="0" max="300" value="0">
+        </div>
+
+        <div class="control-group">
+            <label>RPM: <span id="rpmDisplay">0</span></label>
+            <input type="range" id="rpmSlider" min="0" max="8000" value="0">
+        </div>
+
+        <div class="control-group">
+            <label>Rapport</label>
+            <select id="gearSelect">
+                <option value="0">R (Reverse)</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Position</label>
+            <select id="positionSelect">
+                <option value="bottom-left">Bas Gauche</option>
+                <option value="bottom-right" selected>Bas Droite</option>
+                <option value="bottom-center">Bas Centre</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Thème</label>
+            <select id="themeSelect">
+                <option value="dark" selected>Sombre</option>
+                <option value="light">Clair</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Unité</label>
+            <select id="unitSelect">
+                <option value="kmh" selected>km/h</option>
+                <option value="mph">mph</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <div class="control-row">
+                <button id="engineToggle">Moteur: ON</button>
+                <button id="seatbeltToggle">Ceinture: ✓</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="control-row">
+                <button id="autoSpeedBtn">Auto Vitesse</button>
+                <button id="showHideBtn">Masquer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = {
+            speed: 0,
+            rpm: 0,
+            gear: 0,
+            engine: true,
+            seatbelt: true,
+            unit: 'kmh',
+            maxSpeed: 300
+        };
+
+        let config = {
+            unit: 'kmh',
+            maxSpeed: 300,
+            position: 'bottom-right',
+            theme: 'dark',
+            showRPM: true,
+            showGear: true,
+            showSeatbelt: true,
+            showEngine: true
+        };
+
+        const speedometerEl = document.getElementById('speedometer');
+        const speedValueEl = document.getElementById('speedValue');
+        const speedUnitEl = document.getElementById('speedUnit');
+        const gaugeFillEl = document.querySelector('.gauge-fill');
+        const rpmInfoEl = document.getElementById('rpmInfo');
+        const rpmValueEl = document.getElementById('rpmValue');
+        const gearInfoEl = document.getElementById('gearInfo');
+        const gearValueEl = document.getElementById('gearValue');
+        const engineInfoEl = document.getElementById('engineInfo');
+        const engineValueEl = document.getElementById('engineValue');
+        const seatbeltInfoEl = document.getElementById('seatbeltInfo');
+        const seatbeltValueEl = document.getElementById('seatbeltValue');
+
+        const CIRCUMFERENCE = 2 * Math.PI * 90;
+
+        function init(data) {
+            config = { ...config, ...data.config };
+            
+            speedometerEl.setAttribute('data-position', config.position);
+            speedometerEl.setAttribute('data-theme', config.theme);
+            
+            rpmInfoEl.style.display = config.showRPM ? 'flex' : 'none';
+            gearInfoEl.style.display = config.showGear ? 'flex' : 'none';
+            engineInfoEl.style.display = config.showEngine ? 'flex' : 'none';
+            seatbeltInfoEl.style.display = config.showSeatbelt ? 'flex' : 'none';
+            
+            updateSpeedUnit();
+        }
+
+        function updateSpeedUnit() {
+            speedUnitEl.textContent = config.unit === 'mph' ? 'mph' : 'km/h';
+        }
+
+        function updateSpeed(speed) {
+            if (speed === currentData.speed) return;
+            
+            currentData.speed = speed;
+            
+            requestAnimationFrame(() => {
+                speedValueEl.textContent = Math.floor(speed);
+                
+                const percentage = Math.min(speed / currentData.maxSpeed, 1);
+                const offset = CIRCUMFERENCE - (CIRCUMFERENCE * percentage);
+                gaugeFillEl.style.strokeDashoffset = offset;
+            });
+        }
+
+        function updateRPM(rpm) {
+            if (rpm === currentData.rpm) return;
+            
+            currentData.rpm = rpm;
+            rpmValueEl.textContent = rpm;
+        }
+
+        function updateGear(gear) {
+            if (gear === currentData.gear) return;
+            
+            currentData.gear = gear;
+            
+            let gearText = 'N';
+            if (gear === 0) {
+                gearText = 'R';
+            } else if (gear > 0) {
+                gearText = gear.toString();
+            }
+            
+            gearValueEl.textContent = gearText;
+        }
+
+        function updateEngine(engine) {
+            if (engine === currentData.engine) return;
+            
+            currentData.engine = engine;
+            
+            engineValueEl.textContent = engine ? 'ON' : 'OFF';
+            engineInfoEl.classList.toggle('engine-off', !engine);
+        }
+
+        function updateSeatbelt(seatbelt) {
+            if (seatbelt === currentData.seatbelt) return;
+            
+            currentData.seatbelt = seatbelt;
+            
+            seatbeltValueEl.textContent = seatbelt ? '✓' : '✗';
+            seatbeltInfoEl.classList.toggle('seatbelt-off', !seatbelt);
+        }
+
+        function show() {
+            speedometerEl.classList.remove('hidden');
+        }
+
+        function hide() {
+            speedometerEl.classList.add('hidden');
+        }
+
+        function update(data) {
+            if (data.speed !== undefined) {
+                updateSpeed(data.speed);
+            }
+            
+            if (data.rpm !== undefined) {
+                updateRPM(data.rpm);
+            }
+            
+            if (data.gear !== undefined) {
+                updateGear(data.gear);
+            }
+            
+            if (data.engine !== undefined) {
+                updateEngine(data.engine);
+            }
+            
+            if (data.seatbelt !== undefined) {
+                updateSeatbelt(data.seatbelt);
+            }
+            
+            if (data.unit && data.unit !== config.unit) {
+                config.unit = data.unit;
+                updateSpeedUnit();
+            }
+            
+            if (data.maxSpeed && data.maxSpeed !== currentData.maxSpeed) {
+                currentData.maxSpeed = data.maxSpeed;
+            }
+        }
+
+        init({
+            config: {
+                unit: 'kmh',
+                maxSpeed: 300,
+                position: 'bottom-right',
+                theme: 'dark',
+                showRPM: true,
+                showGear: true,
+                showSeatbelt: true,
+                showEngine: true
+            }
+        });
+
+        show();
+
+        const speedSlider = document.getElementById('speedSlider');
+        const rpmSlider = document.getElementById('rpmSlider');
+        const gearSelect = document.getElementById('gearSelect');
+        const positionSelect = document.getElementById('positionSelect');
+        const themeSelect = document.getElementById('themeSelect');
+        const unitSelect = document.getElementById('unitSelect');
+        const engineToggle = document.getElementById('engineToggle');
+        const seatbeltToggle = document.getElementById('seatbeltToggle');
+        const autoSpeedBtn = document.getElementById('autoSpeedBtn');
+        const showHideBtn = document.getElementById('showHideBtn');
+        const speedDisplay = document.getElementById('speedDisplay');
+        const rpmDisplay = document.getElementById('rpmDisplay');
+
+        let autoSpeedInterval = null;
+        let isVisible = true;
+
+        speedSlider.addEventListener('input', (e) => {
+            const speed = parseInt(e.target.value);
+            speedDisplay.textContent = speed;
+            update({ speed });
+        });
+
+        rpmSlider.addEventListener('input', (e) => {
+            const rpm = parseInt(e.target.value);
+            rpmDisplay.textContent = rpm;
+            update({ rpm });
+        });
+
+        gearSelect.addEventListener('change', (e) => {
+            update({ gear: parseInt(e.target.value) });
+        });
+
+        positionSelect.addEventListener('change', (e) => {
+            config.position = e.target.value;
+            speedometerEl.setAttribute('data-position', config.position);
+        });
+
+        themeSelect.addEventListener('change', (e) => {
+            config.theme = e.target.value;
+            speedometerEl.setAttribute('data-theme', config.theme);
+        });
+
+        unitSelect.addEventListener('change', (e) => {
+            config.unit = e.target.value;
+            updateSpeedUnit();
+            const maxSpeed = config.unit === 'mph' ? 200 : 300;
+            currentData.maxSpeed = maxSpeed;
+            speedSlider.max = maxSpeed;
+        });
+
+        engineToggle.addEventListener('click', () => {
+            currentData.engine = !currentData.engine;
+            update({ engine: currentData.engine });
+            engineToggle.textContent = `Moteur: ${currentData.engine ? 'ON' : 'OFF'}`;
+        });
+
+        seatbeltToggle.addEventListener('click', () => {
+            currentData.seatbelt = !currentData.seatbelt;
+            update({ seatbelt: currentData.seatbelt });
+            seatbeltToggle.textContent = `Ceinture: ${currentData.seatbelt ? '✓' : '✗'}`;
+        });
+
+        autoSpeedBtn.addEventListener('click', () => {
+            if (autoSpeedInterval) {
+                clearInterval(autoSpeedInterval);
+                autoSpeedInterval = null;
+                autoSpeedBtn.textContent = 'Auto Vitesse';
+            } else {
+                let currentSpeed = 0;
+                let direction = 1;
+                autoSpeedInterval = setInterval(() => {
+                    currentSpeed += direction * 2;
+                    if (currentSpeed >= 250) direction = -1;
+                    if (currentSpeed <= 0) direction = 1;
+                    
+                    speedSlider.value = currentSpeed;
+                    speedDisplay.textContent = Math.floor(currentSpeed);
+                    update({ speed: currentSpeed });
+                    
+                    const rpm = Math.floor(currentSpeed * 30);
+                    rpmSlider.value = rpm;
+                    rpmDisplay.textContent = rpm;
+                    update({ rpm });
+                }, 50);
+                autoSpeedBtn.textContent = 'Stop Auto';
+            }
+        });
+
+        showHideBtn.addEventListener('click', () => {
+            isVisible = !isVisible;
+            if (isVisible) {
+                show();
+                showHideBtn.textContent = 'Masquer';
+            } else {
+                hide();
+                showHideBtn.textContent = 'Afficher';
+            }
+        });
+    </script>
+</body>
+</html>
+

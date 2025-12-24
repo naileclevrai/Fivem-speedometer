@@ -23,13 +23,13 @@ const speedometerEl = document.getElementById('speedometer');
 const speedValueEl = document.getElementById('speedValue');
 const speedUnitEl = document.getElementById('speedUnit');
 const gaugeFillEl = document.querySelector('.gauge-fill');
-const rpmRowEl = document.getElementById('rpmRow');
+const rpmInfoEl = document.getElementById('rpmInfo');
 const rpmValueEl = document.getElementById('rpmValue');
-const gearRowEl = document.getElementById('gearRow');
+const gearInfoEl = document.getElementById('gearInfo');
 const gearValueEl = document.getElementById('gearValue');
-const engineRowEl = document.getElementById('engineRow');
+const engineInfoEl = document.getElementById('engineInfo');
 const engineValueEl = document.getElementById('engineValue');
-const seatbeltRowEl = document.getElementById('seatbeltRow');
+const seatbeltInfoEl = document.getElementById('seatbeltInfo');
 const seatbeltValueEl = document.getElementById('seatbeltValue');
 
 const CIRCUMFERENCE = 2 * Math.PI * 90;
@@ -40,10 +40,10 @@ function init(data) {
     speedometerEl.setAttribute('data-position', config.position);
     speedometerEl.setAttribute('data-theme', config.theme);
     
-    rpmRowEl.style.display = config.showRPM ? 'flex' : 'none';
-    gearRowEl.style.display = config.showGear ? 'flex' : 'none';
-    engineRowEl.style.display = config.showEngine ? 'flex' : 'none';
-    seatbeltRowEl.style.display = config.showSeatbelt ? 'flex' : 'none';
+    rpmInfoEl.style.display = config.showRPM ? 'flex' : 'none';
+    gearInfoEl.style.display = config.showGear ? 'flex' : 'none';
+    engineInfoEl.style.display = config.showEngine ? 'flex' : 'none';
+    seatbeltInfoEl.style.display = config.showSeatbelt ? 'flex' : 'none';
     
     updateSpeedUnit();
 }
@@ -94,7 +94,7 @@ function updateEngine(engine) {
     currentData.engine = engine;
     
     engineValueEl.textContent = engine ? 'ON' : 'OFF';
-    engineValueEl.classList.toggle('engine-off', !engine);
+    engineInfoEl.classList.toggle('engine-off', !engine);
 }
 
 function updateSeatbelt(seatbelt) {
@@ -103,7 +103,7 @@ function updateSeatbelt(seatbelt) {
     currentData.seatbelt = seatbelt;
     
     seatbeltValueEl.textContent = seatbelt ? '✓' : '✗';
-    seatbeltValueEl.classList.toggle('seatbelt-off', !seatbelt);
+    seatbeltInfoEl.classList.toggle('seatbelt-off', !seatbelt);
 }
 
 function show() {

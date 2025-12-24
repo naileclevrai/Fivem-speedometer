@@ -56,7 +56,7 @@ body {
 .speedometer-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     align-items: center;
 }
 
@@ -104,51 +104,55 @@ body {
 }
 
 .speed-unit {
-    font-size: 14px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.vehicle-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 140px;
-}
-
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 15px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-.info-row:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-.info-label {
     font-size: 12px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
 }
 
-.info-value {
-    font-size: 14px;
+.vehicle-stats {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-top: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.stat-value {
+    font-size: 20px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.9);
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.stat-label {
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.stat-item.engine-off .stat-value {
+    color: rgba(255, 80, 80, 1);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.stat-item.seatbelt-off .stat-value {
+    color: rgba(255, 180, 60, 1);
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
 .speedometer-container[data-theme="light"] .speed-value {
@@ -168,22 +172,13 @@ body {
     stroke: rgba(0, 0, 0, 0.6);
 }
 
-.speedometer-container[data-theme="light"] .info-row {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(0, 0, 0, 0.1);
-}
-
-.speedometer-container[data-theme="light"] .info-row:hover {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(0, 0, 0, 0.15);
-}
-
-.speedometer-container[data-theme="light"] .info-label {
-    color: rgba(0, 0, 0, 0.6);
-}
-
-.speedometer-container[data-theme="light"] .info-value {
+.speedometer-container[data-theme="light"] .stat-value {
     color: rgba(0, 0, 0, 0.9);
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+.speedometer-container[data-theme="light"] .stat-label {
+    color: rgba(0, 0, 0, 0.5);
 }
 
 @keyframes pulse {
@@ -195,15 +190,6 @@ body {
     }
 }
 
-.info-value.engine-off {
-    color: rgba(255, 100, 100, 0.9);
-    animation: pulse 1s ease-in-out infinite;
-}
-
-.info-value.seatbelt-off {
-    color: rgba(255, 200, 100, 0.9);
-    animation: pulse 1s ease-in-out infinite;
-}
 
 @media (min-aspect-ratio: 21/9) {
     .speed-gauge {
