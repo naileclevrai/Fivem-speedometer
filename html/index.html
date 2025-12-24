@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedometer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="speedometer" class="speedometer-container hidden">
+        <div class="speedometer-wrapper">
+            <div class="speed-gauge">
+                <svg class="gauge-svg" viewBox="0 0 200 200">
+                    <circle class="gauge-background" cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+                    <circle class="gauge-fill" cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="8" stroke-dasharray="565.48" stroke-dashoffset="565.48" stroke-linecap="round"/>
+                </svg>
+                <div class="gauge-content">
+                    <div class="speed-value" id="speedValue">0</div>
+                    <div class="speed-unit" id="speedUnit">km/h</div>
+                </div>
+            </div>
+            
+            <div class="vehicle-info">
+                <div class="info-row" id="rpmRow" style="display: none;">
+                    <span class="info-label">RPM</span>
+                    <span class="info-value" id="rpmValue">0</span>
+                </div>
+                <div class="info-row" id="gearRow" style="display: none;">
+                    <span class="info-label">Gear</span>
+                    <span class="info-value" id="gearValue">N</span>
+                </div>
+                <div class="info-row" id="engineRow" style="display: none;">
+                    <span class="info-label">Engine</span>
+                    <span class="info-value" id="engineValue">ON</span>
+                </div>
+                <div class="info-row" id="seatbeltRow" style="display: none;">
+                    <span class="info-label">Seatbelt</span>
+                    <span class="info-value" id="seatbeltValue">✓</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
+
